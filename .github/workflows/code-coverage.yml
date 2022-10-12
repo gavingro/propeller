@@ -29,20 +29,20 @@ jobs:
     - name: Coverage Badge # https://github.com/tj-actions/coverage-badge-py
       uses: tj-actions/coverage-badge-py@v1.8
       with:
-        output: ".github/coverage.svg"
+        output: "reports/coverage.svg"
 
     - name: Verify Changed files
       uses: tj-actions/verify-changed-files@v9
       id: changed_files
       with:
-        files: .github/coverage.svg
+        files: reports/coverage.svg
 
     - name: Commit files
       if: steps.changed_files.outputs.files_changed == 'true'
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add .github/coverage.svg
+        git add reports/coverage.svg
         git commit -m "Updated coverage.svg"
 
     - name: Push changes
