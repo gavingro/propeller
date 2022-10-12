@@ -1,3 +1,6 @@
+def temp_func():
+    print("Hello World")
+
+
 if __name__ == "__main__":
-    #   # TODO: fix badlint
-    print("Hello World", "Bad Linting")
+    temp_func()
