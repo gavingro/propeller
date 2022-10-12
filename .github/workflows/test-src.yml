@@ -20,4 +20,4 @@ jobs:
         pip install -r requirements.txt
     - name: Testing the Code with pytest
       run: |
-        pytest ./test/src
+        pytest -m "not webtest"
