@@ -1,7 +1,5 @@
 name: Evaluate Code Coverage
 
-on: [push]
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,7 +7,7 @@ jobs:
     - uses: actions/checkout@v3
       with:   
         fetch-depth: 0
-
+        
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
@@ -40,7 +38,7 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add .github/coverage.svg
-        git commit --amend --no-edit
+        git commit -m "Updated coverage.svg"
 
     - name: Push changes
       if: steps.changed_files.outputs.files_changed == 'true'
