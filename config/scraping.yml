@@ -1,0 +1,6 @@
+awws:
+  metar-taf:
+    url: "https://flightplanning.navcanada.ca/cgi-bin/CreePage.pl?Langue=anglais&NoSession=NS_Inconnu&Page=Fore-obs%2Fgfacn31-metar-taf&TypeDoc=html"
+    locations:
+      vancouver: 
+        code: CYVR
