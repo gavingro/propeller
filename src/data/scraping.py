@@ -6,6 +6,7 @@ from webdriver_manager.core.utils import ChromeType
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import selenium.webdriver.chrome as chrome
+from bs4 import BeautifulSoup
 
 from src import config
 
@@ -28,7 +29,7 @@ def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
         A string representing the entire HTML webpage containing the scraped data,
         to be parsed later using BeautifulSoup.
     """
-    # Get URL
+    # Get URL from config.
     scraping_yaml_path = "config/scraping.yml"
     scraping_config = config.read_yaml_from(scraping_yaml_path)
     logging.debug(f"{scraping_config=}")
@@ -47,7 +48,7 @@ def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
         options=chrome_options,
     )
 
-    # Navigate to report
+    # Navigate to report page.
     driver.get(awws_config["url"])
     manual_page_button = driver.find_element(
         By.LINK_TEXT, "Manual Entry / Change Region"
@@ -65,11 +66,6 @@ def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
     # Scrape Report Data Page Source
     return driver.page_source
 
-
-# with open("test/test_web_source.html", "r") as f:
-#     source = f.read()
-# page = BeautifulSoup(source, features="lxml")
-# print(f"{page.title=}, {page.title.string=}")
 
 # TODO Function to parse through AWWS response content with beautifulsoup and get bits.
 def parse_awws_metar_pagesource(page_source: str) -> dict:
@@ -90,7 +86,15 @@ def parse_awws_metar_pagesource(page_source: str) -> dict:
     dict
         Organized dictionary of weather data from web page.
     """
-    raise NotImplementedError
+    page_data = {}
+    page = BeautifulSoup(page_source, "lxml")
+    
+    # Report Timestamp
+    timestamp = page.find_all("span", class_="corps")[0].find("b").text
+    timestamp = timestamp.replace("at ", "").replace(" UTC", "")
+    page_data["report_timestamp"] = timestamp
+    
+    return page_data
 
 
 # TODO Function to connect to Database.
