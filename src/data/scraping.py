@@ -9,7 +9,8 @@ import selenium.webdriver.chrome as chrome
 from src import config
 
 
-def scrape_awws_metar_page(location: str = "vancouver") -> str:
+# TODO: WRITE QUICK TESTS.
+def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
     """
     Connect to Aviation Weather Web Site to scrape the METAR - TAF forecasts
     for the given location.
@@ -58,8 +59,47 @@ def scrape_awws_metar_page(location: str = "vancouver") -> str:
     return driver.page_source
 
 
+# with open("test/test_web_source.html", "r") as f:
+#     source = f.read()
+# page = BeautifulSoup(source, features="lxml")
+# print(f"{page.title=}, {page.title.string=}")
+
 # TODO Function to parse through AWWS response content with beautifulsoup and get bits.
+def parse_awws_metar_pagesource(page_source: str) -> dict:
+    """
+    Parses the page source of expected METAR web page for data.
+
+    Data from page is organized into a dictionary and returned.
+
+    Parameters
+    ----------
+    page_source : str
+        HTML page source string of the AWWS METAR page,
+        ideally generated with scrape_awws_metar_pagesource()
+        function.
+
+    Returns
+    -------
+    dict
+        Organized dictionary of weather data from web page.
+    """
+    raise NotImplementedError
+
+
 # TODO Function to connect to Database.
 # TODO Function to write to database.
+def write_data_dict_to_database(data: dict, database_id: str) -> None:
+    """
+    Takes the input data dictionary and writes it to the database
+    at the provided database_id.
 
-print(scrape_awws_metar_page("vancouver"))
+    Parameters
+    ----------
+    data : dict
+        Dictionary of data values, ideally from the
+        parse_awws_metar_pagesource() function.
+    database_id : str
+        Id to identify the database.
+        Must also exist in the data.yml config file.
+    """
+    raise NotImplementedError
