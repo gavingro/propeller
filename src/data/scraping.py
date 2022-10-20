@@ -2,6 +2,7 @@ import logging
 
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.utils import ChromeType
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import selenium.webdriver.chrome as chrome
@@ -39,9 +40,11 @@ def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
     chrome_options = chrome.options.Options()
     chrome_options.add_argument("--headless")
     driver = webdriver.Chrome(
-        service=chrome.service.Service(ChromeDriverManager().install()),
-        options=chrome_options
-        )
+        service=chrome.service.Service(
+            ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+        ),
+        options=chrome_options,
+    )
 
     # Navigate to report
     driver.get(awws_config["url"])
