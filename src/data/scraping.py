@@ -39,10 +39,11 @@ def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
     # Setup Selenium Chrome Driver
     chrome_options = chrome.options.Options()
     chrome_options.add_argument("--headless")
+    chrome_service = chrome.service.Service(
+        ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+    )
     driver = webdriver.Chrome(
-        service=chrome.service.Service(
-            ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-        ),
+        service=chrome_service,
         options=chrome_options,
     )
 
