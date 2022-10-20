@@ -8,7 +8,17 @@ import src.config as config
 @pytest.fixture
 def good_yaml_at_path():
     # Save YAML to file
-    good_document = {"a": 1, "b": {"c": {"d": 3}, "e": {"f": 4}}}
+    good_document = {
+        "a": 1,
+        "b": {
+            "c": {
+                "d": 3
+            },
+            "e": {
+                "f": 4
+            }
+        }
+    }
     document_path = "good_document.yml"
     with open(document_path, "w") as file:
         yaml.dump(good_document, file)
@@ -18,7 +28,7 @@ def good_yaml_at_path():
     os.remove(document_path)
 
 
-def test_read_good_yaml(good_yaml_at_path):
+def test_reading_good_yaml_gives_expected_structure(good_yaml_at_path):
     document = config.read_yaml_from(good_yaml_at_path)
     assert type(document) == dict
     assert document["a"] == 1
