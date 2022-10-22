@@ -11,7 +11,6 @@ from bs4 import BeautifulSoup
 from src import config
 
 
-# TODO: WRITE QUICK TESTS.
 def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
     """
     Connect to Aviation Weather Web Site to scrape the METAR - TAF forecasts
@@ -68,7 +67,25 @@ def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
 
 
 # TODO Function to parse through AWWS response content with beautifulsoup and get bits.
-def parse_awws_metar_pagesource(page_source: str) -> dict:
+KNOWN_METAR_TABLE_ITEMS = [
+    "metar",
+    "location",
+    "date - time",
+    "wind",
+    "visibility",
+    "runway visible range",
+    "weather",
+    "cloudiness",
+    "temp / dewpoint",
+    "altimeter",
+    "recent weather",
+    "wind shear",
+]
+
+
+def parse_awws_pagesource(
+    source: str, known_fields: list = KNOWN_METAR_TABLE_ITEMS
+) -> dict:
     """
     Parses the page source of expected METAR web page for data.
 
@@ -76,7 +93,7 @@ def parse_awws_metar_pagesource(page_source: str) -> dict:
 
     Parameters
     ----------
-    page_source : str
+    source : str
         HTML page source string of the AWWS METAR page,
         ideally generated with scrape_awws_metar_pagesource()
         function.
@@ -87,13 +104,42 @@ def parse_awws_metar_pagesource(page_source: str) -> dict:
         Organized dictionary of weather data from web page.
     """
     page_data = {}
-    page = BeautifulSoup(page_source, "lxml")
-    
+    page = BeautifulSoup(source, "lxml")
+
     # Report Timestamp
     timestamp = page.find_all("span", class_="corps")[0].find("b").text
     timestamp = timestamp.replace("at ", "").replace(" UTC", "")
     page_data["report_timestamp"] = timestamp
-    
+
+    # Process Each Table on the Page and add to dictionary.
+    # For each, parse the table values and match them 
+    # against passed in known fields.
+    tables = page.find_all("table", {"width": "665"})
+    for table_number, table in enumerate(tables):
+        table_data = {}
+        print(table_number, "=" * 20, "\n")
+        table_items = table.find_all("td")
+        for item_number, table_item in enumerate(table_items):
+            # Clean values slightly while removing the first of the 
+            # text rows as the field label.
+            field_values = table_item.text.strip().replace("\xa0", " ").split("\n")
+            field_item = field_values.pop(0).lower()
+
+            # Handle full encoded report (always first item) as 
+            # proper encoded capital letters.
+            if item_number == 0:
+                logging.debug(f"Encoded Report Matched: {field_item.upper()}.")
+                table_data["encodedreport"] = field_item.upper()
+
+            # Match known field items, and handle missing field values.
+            if field_item in known_fields:
+                logging.debug(f"Item Matched: {field_item}")
+                if field_values:
+                    logging.debug(f"Following Field Value: {field_values}")
+                    table_data[field_item] = field_values
+                else:
+                    logging.debug(f"No field value for {field_item}.")
+        page_data[table_number] = table_data
     return page_data
 
 
