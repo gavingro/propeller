@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import Literal
 
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -67,25 +68,8 @@ def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
     return driver.page_source
 
 
-# TODO Function to parse through AWWS response content with beautifulsoup and get bits.
-KNOWN_METAR_TABLE_ITEMS = [
-    "metar",
-    "location",
-    "date - time",
-    "wind",
-    "visibility",
-    "runway visible range",
-    "weather",
-    "cloudiness",
-    "temp / dewpoint",
-    "altimeter",
-    "recent weather",
-    "wind shear",
-]
-
-
 def parse_awws_pagesource(
-    source: str, known_fields: list = KNOWN_METAR_TABLE_ITEMS
+    source: str, awws_report: Literal["metar-taf"] = "metar-taf"
 ) -> dict:
     """
     Parses the page source of expected METAR web page for data.
@@ -99,11 +83,20 @@ def parse_awws_pagesource(
         ideally generated with scrape_awws_metar_pagesource()
         function.
 
+    awws_repot: Literal["metar-taf"]
+        The type of AWWS report the page source is for.
+        Currently only the METAR - TAF page is supported
+            in the config files.
+        "metar-taf" by default.
+
     Returns
     -------
     dict
         Organized dictionary of weather data from web page.
     """
+    known_fields = config.read_yaml_from("config/scraping.yml")["awws"][awws_report][
+        "known-fields"
+    ]
     page_data = {}
     page = BeautifulSoup(source, "lxml")
 

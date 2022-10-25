@@ -1,6 +1,22 @@
 awws:
   metar-taf:
+    known-fields:
+      - "metar"
+      - "location"
+      - "date - time"
+      - "wind"
+      - "visibility"
+      - "runway visible range"
+      - "weather"
+      - "cloudiness"
+      - "temp / dewpoint"
+      - "altimeter"
+      - "recent weather"
+      - "wind shear"
+
     url: "https://flightplanning.navcanada.ca/cgi-bin/CreePage.pl?Langue=anglais&NoSession=NS_Inconnu&Page=Fore-obs%2Fgfacn31-metar-taf&TypeDoc=html"
     locations:
       vancouver: 
         code: CYVR
+      abbotsford:
+        code: CYXX
