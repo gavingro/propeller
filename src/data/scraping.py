@@ -1,4 +1,5 @@
 import logging
+import re
 
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -108,11 +109,11 @@ def parse_awws_pagesource(
 
     # Report Timestamp
     timestamp = page.find_all("span", class_="corps")[0].find("b").text
-    timestamp = timestamp.replace("at ", "").replace(" UTC", "")
-    page_data["report_timestamp"] = timestamp
+    clean_timestamp = timestamp.replace("at ", "").replace(" UTC", "").strip()
+    page_data["report_timestamp"] = clean_timestamp
 
     # Process Each Table on the Page and add to dictionary.
-    # For each, parse the table values and match them 
+    # For each, parse the table values and match them
     # against passed in known fields.
     tables = page.find_all("table", {"width": "665"})
     for table_number, table in enumerate(tables):
@@ -120,23 +121,29 @@ def parse_awws_pagesource(
         print(table_number, "=" * 20, "\n")
         table_items = table.find_all("td")
         for item_number, table_item in enumerate(table_items):
-            # Clean values slightly while removing the first of the 
+            # Clean values slightly while removing the first of the
             # text rows as the field label.
             field_values = table_item.text.strip().replace("\xa0", " ").split("\n")
             field_item = field_values.pop(0).lower()
 
-            # Handle full encoded report (always first item) as 
+            # Handle full encoded report (always first item) as
             # proper encoded capital letters.
             if item_number == 0:
                 logging.debug(f"Encoded Report Matched: {field_item.upper()}.")
-                table_data["encodedreport"] = field_item.upper()
+                table_data["encodedreport"] = field_item.upper().strip()
 
-            # Match known field items, and handle missing field values.
+            # Match known field items,
+            # and handle missing/messy field values.
             if field_item in known_fields:
                 logging.debug(f"Item Matched: {field_item}")
                 if field_values:
                     logging.debug(f"Following Field Value: {field_values}")
-                    table_data[field_item] = field_values
+                    cleaned_field_values = [
+                        (re.sub(r"\s+", " ", value.strip()))
+                        for value in field_values
+                        if value
+                    ]
+                    table_data[field_item] = cleaned_field_values
                 else:
                     logging.debug(f"No field value for {field_item}.")
         page_data[table_number] = table_data
