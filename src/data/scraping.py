@@ -13,7 +13,9 @@ from bs4 import BeautifulSoup
 from src import config
 
 
-def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
+def scrape_awws_metar_pagesource(
+    location: Literal["vancouver", "abbotsford"] = "vancouver"
+) -> str:
     """
     Connect to Aviation Weather Web Site to scrape the METAR - TAF forecasts
     for the given location.
@@ -21,7 +23,8 @@ def scrape_awws_metar_pagesource(location: str = "vancouver") -> str:
     Parameters
     ----------
     location : str, optional
-        The plain-language location for the airspace data you want to scrape,
+        The plain-language location for the airspace data you want to scrape.
+        Currently 'vancouver' and 'abbotsford' are supported,
         by default 'vancouver'
 
     Returns
@@ -86,7 +89,7 @@ def parse_awws_pagesource(
     awws_repot: Literal["metar-taf"]
         The type of AWWS report the page source is for.
         Currently only the METAR - TAF page is supported
-            in the config files.
+        in the config files.
         "metar-taf" by default.
 
     Returns
