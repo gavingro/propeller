@@ -30,8 +30,11 @@ class TestAWWSScraping:
     def test_awws_metar_vancouver_source_parses_to_expected_dict(
         self, known_awws_metar_van_source
     ):
-        known_awws_metar_van_dict = scraping.parse_awws_pagesource(known_awws_metar_van_source)
+        known_awws_metar_van_dict = scraping.parse_awws_pagesource(
+            known_awws_metar_van_source
+        )
         # Report Data
+        assert known_awws_metar_van_dict["report"] == "metar-taf"
         assert known_awws_metar_van_dict["report_timestamp"] == "10/20/2022 05:03:30"
         # Box 1 Data
         assert (
@@ -39,7 +42,9 @@ class TestAWWSScraping:
             == "METAR CYVR 200400Z VRB02KT 15SM BKN220 11/11 A3022 RMK CI5 VIS N LWR SLP235="
         )
         assert known_awws_metar_van_dict[0]["location"] == ["CYVR - VANCOUVER INTL/BC"]
-        assert known_awws_metar_van_dict[0]["date - time"] == ["20 OCTOBER 2022 - 0400 UTC"]
+        assert known_awws_metar_van_dict[0]["date - time"] == [
+            "20 OCTOBER 2022 - 0400 UTC"
+        ]
         assert known_awws_metar_van_dict[0]["wind"] == ["VRB @ 2 KNOTS"]
         assert known_awws_metar_van_dict[0]["visibility"] == ["15 STAT. MILES"]
         assert known_awws_metar_van_dict[0]["cloudiness"] == [
@@ -53,7 +58,9 @@ class TestAWWSScraping:
             == "METAR CYVR 200300Z 00000KT 15SM PRFG MIFG FEW120 SCT220 11/11 A3022 RMK AC1CI3"
         )
         assert known_awws_metar_van_dict[1]["location"] == ["CYVR - VANCOUVER INTL/BC"]
-        assert known_awws_metar_van_dict[1]["date - time"] == ["20 OCTOBER 2022 - 0300 UTC"]
+        assert known_awws_metar_van_dict[1]["date - time"] == [
+            "20 OCTOBER 2022 - 0300 UTC"
+        ]
         assert known_awws_metar_van_dict[1]["wind"] == ["CALM"]
         assert known_awws_metar_van_dict[1]["visibility"] == ["15 STAT. MILES"]
         assert known_awws_metar_van_dict[1]["weather"] == [
@@ -70,6 +77,11 @@ class TestAWWSScraping:
     def test_awws_metar_vancouver_source_excludes_empty_fields(
         self, known_awws_metar_van_source
     ):
-        known_awws_metar_van_dict = scraping.parse_awws_pagesource(known_awws_metar_van_source)
+        known_awws_metar_van_dict = scraping.parse_awws_pagesource(
+            known_awws_metar_van_source
+        )
         with pytest.raises(KeyError):
             known_awws_metar_van_dict[0]["weather"]
+
+
+# TODO: Add abbotsford tests.

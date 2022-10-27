@@ -101,9 +101,10 @@ def parse_awws_pagesource(
         "known-fields"
     ]
     page_data = {}
-    page = BeautifulSoup(source, "lxml")
+    page_data["report"] = awws_report
 
     # Report Timestamp
+    page = BeautifulSoup(source, "lxml")
     timestamp = page.find_all("span", class_="corps")[0].find("b").text
     clean_timestamp = timestamp.replace("at ", "").replace(" UTC", "").strip()
     page_data["report_timestamp"] = clean_timestamp
