@@ -144,4 +144,12 @@ def parse_awws_pagesource(
                 else:
                     logging.debug(f"No field value for {field_item}.")
         page_data[table_number] = table_data
+    # Get Page Report Location from first 2 tables if possible.
+    # Necessary for eventual partitioning on location in NoSQL.
+    if page_data[0]["location"]:
+        page_data["report_location"] = page_data[0]["location"][0]
+    elif page_data[1] and page_data[1]["location"]:
+        page_data["report_location"] = page_data[1]["location"][0]
+    else:
+        page_data["report_location"] = "unknown"
     return page_data

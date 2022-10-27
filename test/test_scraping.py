@@ -36,6 +36,9 @@ class TestAWWSScraping:
         # Report Data
         assert known_awws_metar_van_dict["report"] == "metar-taf"
         assert known_awws_metar_van_dict["report_timestamp"] == "10/20/2022 05:03:30"
+        assert (
+            known_awws_metar_van_dict["report_location"] == "CYVR - VANCOUVER INTL/BC"
+        )
         # Box 1 Data
         assert (
             known_awws_metar_van_dict[0]["encodedreport"]
