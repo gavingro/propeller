@@ -6,14 +6,24 @@ import src.data.scraping as scraping
 
 @pytest.fixture
 def known_awws_metar_van_source():
-    with open("test/test_web_source.html") as f:
+    with open("test/known_awws_metar_van_source.html") as f:
         known_page_source = f.read()
     return known_page_source
 
+@pytest.fixture
+def known_awws_metar_abbotsford_source():
+    with open("test/known_awws_metar_abbotsford_source.html") as f:
+        known_page_source = f.read()
+    return known_page_source
 
 @pytest.fixture
 def known_awws_metar_van_soup(known_awws_metar_van_source):
     known_page_soup = BeautifulSoup(known_awws_metar_van_source, "lxml")
+    return known_page_soup
+
+@pytest.fixture
+def known_awws_metar_abbotsford_soup(known_awws_metar_abbotsford_source):
+    known_page_soup = BeautifulSoup(known_awws_metar_abbotsford_source, "lxml")
     return known_page_soup
 
 
@@ -26,6 +36,15 @@ class TestAWWSScraping:
         awws_vancouver_source = scraping.scrape_awws_metar_pagesource("vancouver")
         awws_vancouver_page = BeautifulSoup(awws_vancouver_source, "lxml")
         assert awws_vancouver_page.title.text == known_awws_metar_van_soup.title.text
+        
+    @pytest.mark.slow()
+    @pytest.mark.online()
+    def test_awws_metar_abbotsford_page_scrape_connects_to_correct_page(
+        self, known_awws_metar_abbotsford_soup
+    ):
+        awws_abbotsford_source = scraping.scrape_awws_metar_pagesource("abbotsford")
+        awws_abbotsford_page = BeautifulSoup(awws_abbotsford_source, "lxml")
+        assert awws_abbotsford_page.title.text == known_awws_metar_abbotsford_soup.title.text
 
     def test_awws_metar_vancouver_source_parses_to_expected_dict(
         self, known_awws_metar_van_source
