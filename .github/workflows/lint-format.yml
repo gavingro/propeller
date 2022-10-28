@@ -18,6 +18,7 @@ jobs:
     - name: Lint Code with Flake8
       run: |
         flake8 --max-line-length=120 ./src
+        flake8 --max-line-length=120 ./test
     - name: Lint/Format Code with Black # https://black.readthedocs.io/en/stable/integrations/github_actions.html
       uses: psf/black@stable
       with:
