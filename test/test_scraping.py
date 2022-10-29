@@ -58,12 +58,11 @@ class TestAWWSScraping:
         known_awws_metar_van_dict = scraping.parse_awws_pagesource(
             known_awws_metar_van_source
         )
-        # Report Data
-        assert known_awws_metar_van_dict["report"] == "metar-taf"
-        assert known_awws_metar_van_dict["report_timestamp"] == "10/20/2022 05:03:30"
-        assert (
-            known_awws_metar_van_dict["report_location"] == "CYVR - VANCOUVER INTL/BC"
-        )
+        # Report Data (pushed to each Box)
+        assert known_awws_metar_van_dict[0]["report"] == "metar-taf"
+        assert known_awws_metar_van_dict[1]["report"] == "metar-taf"
+        assert known_awws_metar_van_dict[0]["report_timestamp"] == "10/20/2022 05:03:30"
+        assert known_awws_metar_van_dict[1]["report_timestamp"] == "10/20/2022 05:03:30"
         # Box 1 Data
         assert (
             known_awws_metar_van_dict[0]["encodedreport"]
@@ -112,4 +111,21 @@ class TestAWWSScraping:
             known_awws_metar_van_dict[0]["weather"]
 
 
-# TODO: Add abbotsford tests.
+def test_known_utc_string_parses_correctly_to_utc():
+    awws_utc_datetime_string = "28 OCTOBER 2022 - 0300 UTC"
+    expected_awws_utc_datetime_string = "2022-10-28 03:00 UTC"
+    assert (
+        scraping.format_utc_datetime_string(awws_utc_datetime_string)
+        == expected_awws_utc_datetime_string
+    )
+
+
+def test_known_utc_string_parses_correctly_to_pst():
+    awws_utc_datetime_string = "28 OCTOBER 2022 - 0300 UTC"
+    expected_awws_pst_datetime_string = "2022-10-27 20:00 PDT"
+    assert (
+        scraping.format_utc_datetime_string(
+            awws_utc_datetime_string, target_timezone="America/Vancouver"
+        )
+        == expected_awws_pst_datetime_string
+    )

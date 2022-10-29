@@ -1,6 +1,8 @@
 import logging
 import re
-from typing import Literal
+from typing import Literal, Optional
+from datetime import datetime, timezone
+import pytz
 
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -71,6 +73,61 @@ def scrape_awws_metar_pagesource(
     return driver.page_source
 
 
+def format_utc_datetime_string(
+    utc_string: str,
+    target_timezone: str = None,
+    format_string: str = "%d %B %Y - %H%M %Z",
+) -> str:
+    """
+    Transforms the string representation of a UTC datetime
+    scraped into a uniform datetime string, optionally in
+    a passed-in timezone.
+
+    Parameters
+    ----------
+    utc_string : str
+        A string representation of a UTC datetime,
+        similar to those scraped from the AWWS pagesource.
+
+    target_timezone : str
+        A string representing a timezone from the pytz package.
+        If included, the datetime will be converted to the
+        timezone specified, otherwise it will be in UTC time.
+        By default None.
+
+    format_string : str
+        The format of the expected UTC string to read, by
+        default matching the format found in the AWWS weather
+        reports: "d MMM YYYY - HHMM UTC".
+
+    Returns
+    -------
+    str
+        The datetime string in the format "YYYY-MM-DD HH:MM Z"
+
+    Examples
+    --------
+    >> format_scraped_utc_string_to_local_datetime("28 OCTOBER 2022 - 0300 UTC")
+    2022-10-27 20:00 UTC
+
+    >> format_scraped_utc_string_to_local_datetime(
+        "28 OCTOBER 2022 - 0300 UTC",
+        timezone = "America/Vancouver")
+    2022-10-27 20:00 PDT
+
+    """
+    # from https://stackoverflow.com/questions/4563272/how-to-convert-a-utc-datetime-to-a-local-datetime-using-only-standard-library
+    new_datetime = datetime.strptime(utc_string, format_string)
+    aware_datetime = pytz.utc.localize(new_datetime)
+    if target_timezone:
+        local_tz = pytz.timezone(target_timezone)
+        aware_datetime = local_tz.normalize(
+            aware_datetime.replace(tzinfo=pytz.utc).astimezone(tz=local_tz)
+        )
+    new_datetime_string = aware_datetime.strftime("%Y-%m-%d %H:%M %Z")
+    return new_datetime_string
+
+
 def parse_awws_pagesource(
     source: str, awws_report: Literal["metar-taf"] = "metar-taf"
 ) -> dict:
@@ -101,21 +158,21 @@ def parse_awws_pagesource(
         "known-fields"
     ]
     page_data = {}
-    page_data["report"] = awws_report
 
-    # Report Timestamp
+    # Get Timestamp to add to each table.
     page = BeautifulSoup(source, "lxml")
     timestamp = page.find_all("span", class_="corps")[0].find("b").text
     clean_timestamp = timestamp.replace("at ", "").replace(" UTC", "").strip()
-    page_data["report_timestamp"] = clean_timestamp
 
-    # Process Each Table on the Page and add to dictionary.
+    # Process each table on the Page and add to dictionary.
     # For each, parse the table values and match them
     # against passed in known fields.
     tables = page.find_all("table", {"width": "665"})
     for table_number, table in enumerate(tables):
         table_data = {}
-        print(table_number, "=" * 20, "\n")
+        table_data["report_timestamp"] = clean_timestamp
+        table_data["report"] = awws_report
+
         table_items = table.find_all("td")
         for item_number, table_item in enumerate(table_items):
             # Clean values slightly while removing the first of the
@@ -143,13 +200,10 @@ def parse_awws_pagesource(
                     table_data[field_item] = cleaned_field_values
                 else:
                     logging.debug(f"No field value for {field_item}.")
+
+            # Todo:
+            # Clean up 'date - time' into a yyyy/mm/dd format
+            # so we can use that as a Sort key in Dynamo DB with no
+            # further processing.
         page_data[table_number] = table_data
-    # Get Page Report Location from first 2 tables if possible.
-    # Necessary for eventual partitioning on location in NoSQL.
-    if page_data[0]["location"]:
-        page_data["report_location"] = page_data[0]["location"][0]
-    elif page_data[1] and page_data[1]["location"]:
-        page_data["report_location"] = page_data[1]["location"][0]
-    else:
-        page_data["report_location"] = "unknown"
     return page_data
