@@ -69,9 +69,7 @@ class TestAWWSScraping:
             == "METAR CYVR 200400Z VRB02KT 15SM BKN220 11/11 A3022 RMK CI5 VIS N LWR SLP235="
         )
         assert known_awws_metar_van_dict[0]["location"] == ["CYVR - VANCOUVER INTL/BC"]
-        assert known_awws_metar_van_dict[0]["date - time"] == [
-            "20 OCTOBER 2022 - 0400 UTC"
-        ]
+        assert known_awws_metar_van_dict[0]["date - time"] == "2022-10-19 21:00 PDT"
         assert known_awws_metar_van_dict[0]["wind"] == ["VRB @ 2 KNOTS"]
         assert known_awws_metar_van_dict[0]["visibility"] == ["15 STAT. MILES"]
         assert known_awws_metar_van_dict[0]["cloudiness"] == [
@@ -85,9 +83,7 @@ class TestAWWSScraping:
             == "METAR CYVR 200300Z 00000KT 15SM PRFG MIFG FEW120 SCT220 11/11 A3022 RMK AC1CI3"
         )
         assert known_awws_metar_van_dict[1]["location"] == ["CYVR - VANCOUVER INTL/BC"]
-        assert known_awws_metar_van_dict[1]["date - time"] == [
-            "20 OCTOBER 2022 - 0300 UTC"
-        ]
+        assert known_awws_metar_van_dict[1]["date - time"] == "2022-10-19 20:00 PDT"
         assert known_awws_metar_van_dict[1]["wind"] == ["CALM"]
         assert known_awws_metar_van_dict[1]["visibility"] == ["15 STAT. MILES"]
         assert known_awws_metar_van_dict[1]["weather"] == [
@@ -115,7 +111,7 @@ def test_known_utc_string_parses_correctly_to_utc():
     awws_utc_datetime_string = "28 OCTOBER 2022 - 0300 UTC"
     expected_awws_utc_datetime_string = "2022-10-28 03:00 UTC"
     assert (
-        scraping.format_utc_datetime_string(awws_utc_datetime_string)
+        scraping.format_utc_datetime(awws_utc_datetime_string)
         == expected_awws_utc_datetime_string
     )
 
@@ -124,7 +120,7 @@ def test_known_utc_string_parses_correctly_to_pst():
     awws_utc_datetime_string = "28 OCTOBER 2022 - 0300 UTC"
     expected_awws_pst_datetime_string = "2022-10-27 20:00 PDT"
     assert (
-        scraping.format_utc_datetime_string(
+        scraping.format_utc_datetime(
             awws_utc_datetime_string, target_timezone="America/Vancouver"
         )
         == expected_awws_pst_datetime_string

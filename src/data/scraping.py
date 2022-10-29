@@ -1,7 +1,7 @@
 import logging
 import re
-from typing import Literal, Optional
-from datetime import datetime, timezone
+from typing import Literal
+from datetime import datetime
 import pytz
 
 from selenium import webdriver
@@ -73,7 +73,7 @@ def scrape_awws_metar_pagesource(
     return driver.page_source
 
 
-def format_utc_datetime_string(
+def format_utc_datetime(
     utc_string: str,
     target_timezone: str = None,
     format_string: str = "%d %B %Y - %H%M %Z",
@@ -116,7 +116,6 @@ def format_utc_datetime_string(
     2022-10-27 20:00 PDT
 
     """
-    # from https://stackoverflow.com/questions/4563272/how-to-convert-a-utc-datetime-to-a-local-datetime-using-only-standard-library
     new_datetime = datetime.strptime(utc_string, format_string)
     aware_datetime = pytz.utc.localize(new_datetime)
     if target_timezone:
@@ -197,13 +196,17 @@ def parse_awws_pagesource(
                         for value in field_values
                         if value
                     ]
+                    # Leaving as list, even for single elements.
                     table_data[field_item] = cleaned_field_values
                 else:
                     logging.debug(f"No field value for {field_item}.")
 
-            # Todo:
-            # Clean up 'date - time' into a yyyy/mm/dd format
-            # so we can use that as a Sort key in Dynamo DB with no
-            # further processing.
+        # Clean up the date - time for reports and convert to Vancouver
+        # time to use as Sort Key for Dynamo DB.
+        if "date - time" in table_data.keys():
+            table_data["date - time"] = format_utc_datetime(
+                table_data["date - time"][0],
+                target_timezone="America/Vancouver"
+            )
         page_data[table_number] = table_data
     return page_data
