@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from bs4 import BeautifulSoup
 
@@ -68,7 +70,7 @@ class TestAWWSScraping:
             known_awws_metar_van_dict[0]["encodedreport"]
             == "METAR CYVR 200400Z VRB02KT 15SM BKN220 11/11 A3022 RMK CI5 VIS N LWR SLP235="
         )
-        assert known_awws_metar_van_dict[0]["location"] == ["CYVR - VANCOUVER INTL/BC"]
+        assert known_awws_metar_van_dict[0]["location"] == "CYVR - VANCOUVER INTL/BC"
         assert known_awws_metar_van_dict[0]["date - time"] == "2022-10-19 21:00 PDT"
         assert known_awws_metar_van_dict[0]["wind"] == ["VRB @ 2 KNOTS"]
         assert known_awws_metar_van_dict[0]["visibility"] == ["15 STAT. MILES"]
@@ -82,7 +84,7 @@ class TestAWWSScraping:
             known_awws_metar_van_dict[1]["encodedreport"]
             == "METAR CYVR 200300Z 00000KT 15SM PRFG MIFG FEW120 SCT220 11/11 A3022 RMK AC1CI3"
         )
-        assert known_awws_metar_van_dict[1]["location"] == ["CYVR - VANCOUVER INTL/BC"]
+        assert known_awws_metar_van_dict[1]["location"] == "CYVR - VANCOUVER INTL/BC"
         assert known_awws_metar_van_dict[1]["date - time"] == "2022-10-19 20:00 PDT"
         assert known_awws_metar_van_dict[1]["wind"] == ["CALM"]
         assert known_awws_metar_van_dict[1]["visibility"] == ["15 STAT. MILES"]
@@ -105,6 +107,21 @@ class TestAWWSScraping:
         )
         with pytest.raises(KeyError):
             known_awws_metar_van_dict[0]["weather"]
+
+    @pytest.mark.slow()
+    @pytest.mark.online()
+    def test_integration_for_awws_metar_web_scrape_components_provides_keys(self):
+        page_source = scraping.scrape_awws_metar_pagesource()
+        page_dict = scraping.parse_awws_pagesource(page_source)
+        for table in page_dict.values():
+            # Location and date - time are our DynamoDB keys.
+            report_location = table["location"]
+            assert type(report_location) is str
+
+            report_datetime = datetime.datetime.strptime(
+                table["date - time"], "%Y-%m-%d %H:%M %Z"
+            )
+            assert type(report_datetime) is datetime.datetime
 
 
 def test_known_utc_string_parses_correctly_to_utc():

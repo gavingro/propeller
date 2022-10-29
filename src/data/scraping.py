@@ -27,7 +27,7 @@ def scrape_awws_metar_pagesource(
     location : str, optional
         The plain-language location for the airspace data you want to scrape.
         Currently 'vancouver' and 'abbotsford' are supported,
-        by default 'vancouver'
+        by default 'vancouver'.
 
     Returns
     -------
@@ -192,7 +192,7 @@ def parse_awws_pagesource(
                 if field_values:
                     logging.debug(f"Following Field Value: {field_values}")
                     cleaned_field_values = [
-                        (re.sub(r"\s+", " ", value.strip()))
+                        re.sub(r"\s+", " ", value.strip())
                         for value in field_values
                         if value
                     ]
@@ -200,6 +200,11 @@ def parse_awws_pagesource(
                     table_data[field_item] = cleaned_field_values
                 else:
                     logging.debug(f"No field value for {field_item}.")
+
+        # Clean up the location for reports to use as Partition Key
+        # in Dynamo DB.
+        if "location" in table_data.keys():
+            table_data["location"] = table_data["location"][0]
 
         # Clean up the date - time for reports and convert to Vancouver
         # time to use as Sort Key for Dynamo DB.
