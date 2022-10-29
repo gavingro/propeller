@@ -71,7 +71,7 @@ class TestAWWSScraping:
             == "METAR CYVR 200400Z VRB02KT 15SM BKN220 11/11 A3022 RMK CI5 VIS N LWR SLP235="
         )
         assert known_awws_metar_van_dict[0]["location"] == "CYVR - VANCOUVER INTL/BC"
-        assert known_awws_metar_van_dict[0]["date - time"] == "2022-10-19 21:00 PDT"
+        assert known_awws_metar_van_dict[0]["datetime"] == "2022-10-19 21:00 PDT"
         assert known_awws_metar_van_dict[0]["wind"] == ["VRB @ 2 KNOTS"]
         assert known_awws_metar_van_dict[0]["visibility"] == ["15 STAT. MILES"]
         assert known_awws_metar_van_dict[0]["cloudiness"] == [
@@ -85,7 +85,7 @@ class TestAWWSScraping:
             == "METAR CYVR 200300Z 00000KT 15SM PRFG MIFG FEW120 SCT220 11/11 A3022 RMK AC1CI3"
         )
         assert known_awws_metar_van_dict[1]["location"] == "CYVR - VANCOUVER INTL/BC"
-        assert known_awws_metar_van_dict[1]["date - time"] == "2022-10-19 20:00 PDT"
+        assert known_awws_metar_van_dict[1]["datetime"] == "2022-10-19 20:00 PDT"
         assert known_awws_metar_van_dict[1]["wind"] == ["CALM"]
         assert known_awws_metar_van_dict[1]["visibility"] == ["15 STAT. MILES"]
         assert known_awws_metar_van_dict[1]["weather"] == [
@@ -114,12 +114,12 @@ class TestAWWSScraping:
         page_source = scraping.scrape_awws_metar_pagesource()
         page_dict = scraping.parse_awws_pagesource(page_source)
         for table in page_dict.values():
-            # Location and date - time are our DynamoDB keys.
+            # Location and datetime are our DynamoDB keys.
             report_location = table["location"]
             assert type(report_location) is str
 
             report_datetime = datetime.datetime.strptime(
-                table["date - time"], "%Y-%m-%d %H:%M %Z"
+                table["datetime"], "%Y-%m-%d %H:%M %Z"
             )
             assert type(report_datetime) is datetime.datetime
 

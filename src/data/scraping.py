@@ -206,12 +206,13 @@ def parse_awws_pagesource(
         if "location" in table_data.keys():
             table_data["location"] = table_data["location"][0]
 
-        # Clean up the date - time for reports and convert to Vancouver
+        # Clean up the datetime for reports and convert to Vancouver
         # time to use as Sort Key for Dynamo DB.
         if "date - time" in table_data.keys():
-            table_data["date - time"] = format_utc_datetime(
+            table_data["datetime"] = format_utc_datetime(
                 table_data["date - time"][0],
                 target_timezone="America/Vancouver"
             )
+            table_data["date - time"].pop
         page_data[table_number] = table_data
     return page_data
