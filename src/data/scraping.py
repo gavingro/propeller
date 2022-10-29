@@ -142,7 +142,7 @@ def parse_awws_pagesource(
         ideally generated with scrape_awws_metar_pagesource()
         function.
 
-    awws_repot: Literal["metar-taf"]
+    awws_report: Literal["metar-taf"]
         The type of AWWS report the page source is for.
         Currently only the METAR - TAF page is supported
         in the config files.
@@ -210,8 +210,7 @@ def parse_awws_pagesource(
         # time to use as Sort Key for Dynamo DB.
         if "date - time" in table_data.keys():
             table_data["datetime"] = format_utc_datetime(
-                table_data["date - time"][0],
-                target_timezone="America/Vancouver"
+                table_data["date - time"][0], target_timezone="America/Vancouver"
             )
             table_data["date - time"].pop
         page_data[table_number] = table_data
