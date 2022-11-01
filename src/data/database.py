@@ -1,4 +1,33 @@
-# TODO Function to connect to Database.
+import contextlib
+
+import boto3
+
+from src import config
+
+
+@contextlib.contextmanager
+def dynamodb_connection(**boto_client_kwargs):
+    """
+    Creates a client connection to AWS DynamoDB with 
+    the passed in keyword arguments.
+    
+    Notably, use endpoint_url = http://localhost:8000
+    to connect to local DynamoDB instance.
+
+    Yields
+    ------
+    boto_client_kwargs: dictionary
+        Keyword arguments for Boto3's client connection.
+    """
+    db_client = boto3.client("dynamodb", **boto_client_kwargs)
+    try:
+        yield db_client
+    finally:
+        db_client.close()
+    
+    
+
+
 # TODO Function to write to database.
 def write_data_dict_to_database(data: dict, database_id: str) -> None:
     """
