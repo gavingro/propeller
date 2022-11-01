@@ -131,6 +131,7 @@ dmypy.json
 # VSCode
 .vscode
 
-# Scrap Work
+# Scrap Work and Testing
 scrap.ipynb
 scrap.py
+dynamodb_local_latest/
