@@ -4,13 +4,15 @@ import boto3
 
 from src import config
 
-
+# Using the boto3 client interface instead of the
+# boto3 resource interface allows us to access
+# the local DynamoDB database by URL for testing.
 @contextlib.contextmanager
 def dynamodb_connection(**boto_client_kwargs):
     """
-    Creates a client connection to AWS DynamoDB with 
+    Creates a client connection to AWS DynamoDB with
     the passed in keyword arguments.
-    
+
     Notably, use endpoint_url = http://localhost:8000
     to connect to local DynamoDB instance.
 
@@ -24,8 +26,6 @@ def dynamodb_connection(**boto_client_kwargs):
         yield db_client
     finally:
         db_client.close()
-    
-    
 
 
 # TODO Function to write to database.

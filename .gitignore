@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.DS_STORE
 
 # C extensions
 *.so
@@ -135,3 +136,4 @@ dmypy.json
 scrap.ipynb
 scrap.py
 dynamodb_local_latest/
+shared-local-instance.db
