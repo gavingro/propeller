@@ -34,10 +34,9 @@ def local_dynamo_db(data_config):
 
     # Setup Local DynamoDB Connection Client
     test_url_endpoint = data_config["dynamodb"]["test"]["endpoint-url"]
-    db_client = boto3.client("dynamodb", endpoint_url=test_url_endpoint)
+    db_client = boto3.resource("dynamodb", endpoint_url=test_url_endpoint)
     yield db_client
     # Cleanup DB Client and Local DynamoDB Server, if necessary.
-    db_client.close()
     if local_db_server:
         try:
             local_db_server.terminate()
@@ -59,6 +58,13 @@ def local_awws_metar_table_in_db(local_dynamo_db, data_config):
     partition_key = metar_taf_config["partition-key"]
     sort_key = metar_taf_config["sort-key"]
 
+    # Clear table if exists already.
+    existing_tables = [table.table_name for table in local_dynamo_db.tables.all()]
+    if table_name in existing_tables:
+        table = local_dynamo_db.Table(table_name)
+        table.delete()
+        table.wait_until_not_exists()
+
     # Create Table.
     local_dynamo_db.create_table(
         TableName=table_name,
@@ -74,43 +80,42 @@ def local_awws_metar_table_in_db(local_dynamo_db, data_config):
     )
     # Wait for the Async Table Creation Task to finish.
     # Ideally, we should wait for the table status to be READY, not CREATING.
-    table_exists_waiter = local_dynamo_db.get_waiter("table_exists")
-    table_exists_waiter.wait(
-        TableName=table_name, WaiterConfig={"Delay": 1, "MaxAttempts": 10}
-    )
+    table = local_dynamo_db.Table(table_name)
+    table.wait_until_exists()
     logging.debug("AWWS METAR table created in Local DB for testing.")
     yield local_dynamo_db
+
     # Cleanup Table.
-    local_dynamo_db.delete_table(TableName=table_name)
-    table_not_exists_waiter = local_dynamo_db.get_waiter("table_not_exists")
-    table_not_exists_waiter.wait(
-        TableName=table_name, WaiterConfig={"Delay": 1, "MaxAttempts": 10}
-    )
-    logging.debug("AWWS METAR table in Local DB for testing sucessfully deleted.")
+    table.delete()
 
 
 @pytest.mark.expensive
 @pytest.mark.online
-def test_dynamodb_context_manager_connects_to_aws():
+def test_dynamodb_context_manager_connects_to_aws(data_config):
+    table_name = data_config["dynamodb"]["awws"]["metar-taf"]["table-name"]
     with database.dynamodb_connection() as db:
-        response = db.list_tables()
-    assert type(response) == dict
+        table = db.Table(table_name)
+        assert table.table_status == "ACTIVE"
 
 
 @pytest.mark.local_db
-def test_dynamodb_context_manager_connects_to_local_db(local_dynamo_db):
-    with database.dynamodb_connection(endpoint_url="http://localhost:8000") as db:
-        response = db.list_tables()
-    assert type(response) == dict
+def test_dynamodb_context_manager_connects_to_local_db(local_awws_metar_table_in_db, data_config):
+    table_name = data_config["dynamodb"]["awws"]["metar-taf"]["table-name"]
+    table = local_awws_metar_table_in_db.Table(table_name)
+    assert table.table_status == "ACTIVE"
 
 
 @pytest.mark.slow
 def test_dynamodb_context_manager_errors_on_bad_endpoint():
     with pytest.raises(botocore.exceptions.EndpointConnectionError):
-        with database.dynamodb_connection(endpoint_url="http://localhost:8080") as db:
-            db.list_tables()
+        with database.dynamodb_connection(endpoint_url="http://iamabadaddress") as db:
+            table = db.Table("bad-table-name-doesnt-exist")
+            # Call some attribute to force table db connection.
+            assert table.billing_mode_summary is None
 
 
 def test_local_db_connection(local_awws_metar_table_in_db, data_config):
     table_name = data_config["dynamodb"]["awws"]["metar-taf"]["table-name"]
-    response = local_awws_metar_table_in_db.describe_table(TableName=table_name)
+    table = local_awws_metar_table_in_db.Table(table_name)
+    billing_summary = table.billing_mode_summary
+    assert billing_summary is None
