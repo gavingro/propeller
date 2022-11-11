@@ -2,12 +2,27 @@ import pytest
 import os
 import subprocess
 import logging
+import json
 
 import botocore
 import boto3
 
 from src.data import database
 from src import config
+
+
+@pytest.fixture
+def known_awws_metar_van_data():
+    with open("test/known_awws_metar_van_data.json") as f:
+        data = json.load(f)
+    return data
+
+
+@pytest.fixture
+def known_awws_metar_abbotsford_data():
+    with open("test/known_awws_metar_abbotsford_data.json") as f:
+        data = json.load(f)
+    return data
 
 
 @pytest.fixture
@@ -99,7 +114,9 @@ def test_dynamodb_context_manager_connects_to_aws(data_config):
 
 
 @pytest.mark.local_db
-def test_dynamodb_context_manager_connects_to_local_db(local_awws_metar_table_in_db, data_config):
+def test_dynamodb_context_manager_connects_to_local_db(
+    local_awws_metar_table_in_db, data_config
+):
     table_name = data_config["dynamodb"]["awws"]["metar-taf"]["table-name"]
     table = local_awws_metar_table_in_db.Table(table_name)
     assert table.table_status == "ACTIVE"
@@ -114,8 +131,21 @@ def test_dynamodb_context_manager_errors_on_bad_endpoint():
             assert table.billing_mode_summary is None
 
 
-def test_local_db_connection(local_awws_metar_table_in_db, data_config):
+@pytest.mark.local_db
+@pytest.mark.parametrize(
+    "data, expected_count",
+    [("known_awws_metar_van_data", 4), ("known_awws_metar_abbotsford_data", 4)],
+)
+def test_write_data_document_writes_expected_amount_of_documents(
+    local_awws_metar_table_in_db, data_config, request, data, expected_count
+):
+    data = request.getfixturevalue(data)
+    database.write_data_documents_to_awws_database(
+        db=local_awws_metar_table_in_db,
+        data_documents=data,
+    )
+
     table_name = data_config["dynamodb"]["awws"]["metar-taf"]["table-name"]
     table = local_awws_metar_table_in_db.Table(table_name)
-    billing_summary = table.billing_mode_summary
-    assert billing_summary is None
+    item_count = table.item_count
+    assert item_count == expected_count

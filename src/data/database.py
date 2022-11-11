@@ -1,5 +1,5 @@
 import contextlib
-from typing import Literal
+from typing import Dict, Literal
 
 import boto3
 
@@ -59,37 +59,43 @@ def dynamodb_connection(**boto_client_kwargs):
 
 
 # TODO Function to write to database.
-def write_data_document_to_awws_database(
+def write_data_documents_to_awws_database(
     db: boto3.resources.factory,
-    data: dict,
-    database_id: Literal["metar-taf"] = "metar-taf",
+    data_documents: dict,
+    report_type: Literal["metar-taf"] = "metar-taf",
 ) -> None:
     """
     Takes the input data dictionary and writes it to the database
-    at the provided database_id.
+    at the respective report_type.
 
     Parameters
     ----------
-    client: botocore.client.DynamoDB
-        A boto3 client connection connecting to a DynamoDB
+    db: boto3.resources.factory
+        A boto3 resource connection connecting to a DynamoDB
         database, ideally created with dynamodb_connection().
     data : dict
-        Dictionary of data values, ideally from the
+        Dictionary of data values, ideally the
+        collectino of documents from the
         parse_awws_metar_pagesource() function.
-    database_id : str
+    report_type : str
         Id to identify the database config information.
         Currently only ["metar-taf"] is supported.
         Must also exist in the data.yml config file.
     """
-    raise NotImplementedError
+    # Handle empty case.
+    if not data_documents:
+        return
+    
     # Get Config.
     data_config = config.read_yaml_from("config/data.yml")
-    table_config = data_config["dynamodb"]["awws"][database_id]
+    report_type = data_documents["0"]["report"]
+    table_config = data_config["dynamodb"]["awws"][report_type]
     table_name = table_config["table-name"]
-    # partition_key = table_config["partition-key"]
-    # sort_key = table_config["sort-key"]
+    partition_key = table_config["partition-key"]
+    sort_key = table_config["sort-key"]
 
-    # Write to Table
+    # Write to Table if it has the necessary keys.
     table = db.Table(table_name)
-    table.put_item(Item=data)
-    # WRITE TEST AND ENSURE IT WORKS
+    for data_document in data_documents.values():
+        if data_document.get(partition_key, None) and data_document.get(sort_key, None):
+            table.put_item(Item=data_document)
