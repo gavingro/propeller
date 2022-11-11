@@ -34,8 +34,7 @@ def dynamodb_connection(**boto_client_kwargs):
 
 def write_data_documents_to_awws_database(
     db: boto3.resources.factory,
-    data_documents: Dict[int: dict],
-    report_type: Literal["metar-taf"] = "metar-taf",
+    data_documents: dict
 ) -> None:
     """
     Takes the input data dictionary and writes it to the database
@@ -50,10 +49,6 @@ def write_data_documents_to_awws_database(
         Dictionary of data values, ideally the
         collectino of documents from the
         parse_awws_metar_pagesource() function.
-    report_type : str
-        Id to identify the database config information.
-        Currently only ["metar-taf"] is supported.
-        Must also exist in the data.yml config file.
     """
     # Handle empty case.
     if not data_documents:
