@@ -34,7 +34,7 @@ def dynamodb_connection(**boto_client_kwargs):
 
 def write_data_documents_to_awws_database(
     db: boto3.resources.factory,
-    data_documents: dict,
+    data_documents: Dict[int: dict],
     report_type: Literal["metar-taf"] = "metar-taf",
 ) -> None:
     """
