@@ -1,5 +1,4 @@
 import contextlib
-from typing import Dict, Literal
 
 import boto3
 
