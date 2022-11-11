@@ -21,7 +21,7 @@ def dynamodb_connection(**boto_client_kwargs):
     Parameters
     ------
     boto_client_kwargs: dictionary
-        Keyword arguments for Boto3's client connection.
+        Keyword arguments for Boto3's resource connection.
 
     Yields
     ------
@@ -32,33 +32,6 @@ def dynamodb_connection(**boto_client_kwargs):
     yield db_client
 
 
-# @contextlib.contextmanager
-# def dynamodb_connection(**boto_client_kwargs):
-#     """
-#     Creates a client connection to AWS DynamoDB with
-#     the passed in keyword arguments.
-
-#     Notably, use endpoint_url = http://localhost:8000
-#     to connect to local DynamoDB instance.
-
-#     Parameters
-#     ------
-#     boto_client_kwargs: dictionary
-#         Keyword arguments for Boto3's client connection.
-
-#     Yields
-#     ------
-#     botocore.client.DynamoDb
-#         A boto3 client connection to a DynamoDB instance.
-#     """
-#     db_client = boto3.client("dynamodb", **boto_client_kwargs)
-#     try:
-#         yield db_client
-#     finally:
-#         db_client.close()
-
-
-# TODO Function to write to database.
 def write_data_documents_to_awws_database(
     db: boto3.resources.factory,
     data_documents: dict,
@@ -85,7 +58,7 @@ def write_data_documents_to_awws_database(
     # Handle empty case.
     if not data_documents:
         return
-    
+
     # Get Config.
     data_config = config.read_yaml_from("config/data.yml")
     report_type = data_documents["0"]["report"]
