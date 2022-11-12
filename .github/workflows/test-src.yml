@@ -33,7 +33,7 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        role-to-assume: arn:aws:iam::123456789100:role/propeller-test-access
+        role-to-assume: arn:aws:iam::832310466375:role/propeller-test-access
         aws-region: us-west-1
 
     - name: Testing the Code with pytest
