@@ -1,6 +1,6 @@
 name: Test Source Files
 
-on: [push, pull_request]
+on: [pull_request]
 
 permissions:
   id-token: write
@@ -41,4 +41,4 @@ jobs:
 
     - name: Testing the Code with pytest
       run: |
-        pytest -m "not expensive"
+        pytest
