@@ -45,7 +45,7 @@ jobs:
 
     - name: Running Test Suite to Generate Code Coverage 
       run: |
-        coverage run -m pytest "not expensive"
+        coverage run -m pytest ./test
 
     - name: Coverage Badge # https://github.com/tj-actions/coverage-badge-py
       uses: tj-actions/coverage-badge-py@v1.8
