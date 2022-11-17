@@ -2,6 +2,9 @@ name: Test AWS Setup in Isolation
 
 on: [workflow_dispatch]
 
+permissions:
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
