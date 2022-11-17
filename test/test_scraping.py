@@ -108,7 +108,7 @@ class TestAWWSScraping:
         with pytest.raises(KeyError):
             known_awws_metar_van_dict[0]["weather"]
 
-    @pytest.mark.xfail(strict = False)
+    @pytest.mark.xfail(strict=False)
     @pytest.mark.slow()
     @pytest.mark.online()
     def test_integration_for_awws_metar_web_scrape_components_provides_keys(self):
