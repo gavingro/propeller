@@ -32,8 +32,7 @@ def dynamodb_connection(**boto_client_kwargs):
 
 
 def write_data_documents_to_awws_database(
-    db: boto3.resources.factory,
-    data_documents: dict
+    db: boto3.resources.factory, data_documents: dict
 ) -> None:
     """
     Takes the input data dictionary and writes it to the database
