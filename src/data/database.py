@@ -1,4 +1,5 @@
 import contextlib
+import logging
 
 import boto3
 
@@ -61,7 +62,28 @@ def write_data_documents_to_awws_database(
     sort_key = table_config["sort-key"]
 
     # Write to Table if it has the necessary keys.
+    # If not, log warnings.
     table = db.Table(table_name)
+    document_skip_count = 0
     for data_document in data_documents.values():
         if data_document.get(partition_key, None) and data_document.get(sort_key, None):
             table.put_item(Item=data_document)
+        else:
+            document_skip_count += 1
+            if data_document.get(partition_key, None):
+                logging.warning(
+                    "AWS Report skipped because Sort Key (Date) is missing from data."
+                )
+            elif data_document.get(sort_key, None):
+                logging.warning(
+                    "AWS Report skipped because Partition Key (Location) is missing from data."
+                )
+            else:
+                logging.warning(
+                    "AWS report skipped because both Sort Key (Date) "
+                    "and Partition Key (Location) are missing from data."
+                )
+    if document_skip_count:
+        logging.warning(
+            f"{document_skip_count} / {len(data_documents.values())} documents skipped."
+        )
