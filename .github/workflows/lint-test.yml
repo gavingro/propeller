@@ -1,0 +1,112 @@
+name: Lint, Build, and Test Source Files
+
+on: 
+  pull_request:
+    branches:
+    - "**"
+  push:
+    branches:
+    - "**"
+
+permissions: write-all
+
+jobs:
+  lint:
+    name: Lint with Black and Flake8.
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8
+    - name: Lint Code with Flake8
+      run: |
+        flake8 --max-line-length=120 ./src
+        flake8 --max-line-length=120 ./test
+    - name: Lint/Format Code with Black # https://black.readthedocs.io/en/stable/integrations/github_actions.html
+      uses: psf/black@stable
+      with:
+        options: "--check --diff"
+        src: "./src"
+        version: "~= 22.0"
+
+  build-test:
+    name: Build and Test Files.
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+    steps:
+    - uses: actions/checkout@v3
+      with:   
+        fetch-depth: 0
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Remove default Chromium
+      run: sudo apt purge chromium-browser
+
+    - name: Install a new Chromium
+      run: sudo apt install -y chromium-browser
+
+    - name: Start DynamoDB in GitHub Actions
+      uses: rrainn/dynamodb-action@v3.0.0
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::832310466375:role/propeller-test-access
+        aws-region: us-west-1
+
+    - name: Running Full Test Suite (Pull Request or Main Coverage)
+      if: (github.event_name == 'pull_request') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      run: |
+        coverage run -m pytest ./test
+
+    - name: Running Slim Test Suite (Push)
+      if: github.event_name == 'push' && github.ref != 'refs/heads/main'
+      run: |
+        pytest -m "not expensive"
+
+    - name: Coverage Badge (Main Coverage) # https://github.com/tj-actions/coverage-badge-py
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.python-version == '3.9'
+      uses: tj-actions/coverage-badge-py@v1.8
+      with:
+        output: "reports/coverage.svg"
+
+    - name: Verify Changed files (Main Coverage)
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: tj-actions/verify-changed-files@v9
+      id: changed_files
+      with:
+        files: reports/coverage.svg
+
+    - name: Commit coverage.svg (Coverage)
+      if: steps.changed_files.outputs.files_changed == 'true'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add reports/coverage.svg
+        git commit -m "Updated coverage.svg [no ci]"
+
+    - name: Push coverage.svg (Main Coverage)
+      if: steps.changed_files.outputs.files_changed == 'true'
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.github_token }}
+        branch: ${{ github.ref }}
+

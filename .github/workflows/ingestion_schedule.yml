@@ -1,23 +1,22 @@
-name: Test Source Files
+name: Ingestion Pipeline to write to DynamoDB
 
-on: [pull_request]
+on: 
+  schedule:
+    - cron: "0 */2 * * *"
 
 permissions:
   id-token: write
 
 jobs:
-  build:
+  build-run-ingestion:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.9
       uses: actions/setup-python@v3
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.9"
 
     - name: Install dependencies
       run: |
@@ -30,15 +29,12 @@ jobs:
     - name: Install a new Chromium
       run: sudo apt install -y chromium-browser
 
-    - name: Start DynamoDB in GitHub Actions
-      uses: rrainn/dynamodb-action@v3.0.0
-
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         role-to-assume: arn:aws:iam::832310466375:role/propeller-test-access
         aws-region: us-west-1
 
-    - name: Testing the Code with pytest
+    - name: Execute Ingestion Pipeline
       run: |
-        pytest
+      	python main_ingestion.py

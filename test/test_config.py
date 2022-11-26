@@ -8,17 +8,7 @@ import src.config as config
 @pytest.fixture
 def good_yaml_at_path():
     # Save YAML to file
-    good_document = {
-        "a": 1,
-        "b": {
-            "c": {
-                "d": 3
-            },
-            "e": {
-                "f": 4
-            }
-        }
-    }
+    good_document = {"a": 1, "b": {"c": {"d": 3}, "e": {"f": 4}}}
     document_path = "good_document.yml"
     with open(document_path, "w") as file:
         yaml.dump(good_document, file)

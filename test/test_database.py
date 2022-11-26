@@ -15,14 +15,22 @@ from src import config
 def known_awws_metar_van_data():
     with open("test/known_awws_metar_van_data.json") as f:
         data = json.load(f)
-    return data
+    # Update JSON (string) keys to the integers we create during scraping.
+    updated_key_data = {
+        int(table_num): table_data for table_num, table_data in data.items()
+    }
+    return updated_key_data
 
 
 @pytest.fixture
 def known_awws_metar_abbotsford_data():
     with open("test/known_awws_metar_abbotsford_data.json") as f:
         data = json.load(f)
-    return data
+    # Update JSON (string) keys to the integers we create during scraping.
+    updated_key_data = {
+        int(table_num): table_data for table_num, table_data in data.items()
+    }
+    return updated_key_data
 
 
 @pytest.fixture
