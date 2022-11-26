@@ -2,11 +2,7 @@ name: Lint, Build, and Test Source Files
 
 on: [pull_request]
 
-permissions:
-  id-token: write
-  pull-requests: write
-  issues: write
-  repository-projects: write
+permissions: write-all
 
 jobs:
   lint:
