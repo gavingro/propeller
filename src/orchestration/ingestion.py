@@ -15,12 +15,14 @@ def awws_metar_ingestion_pipeline():
     logging.info("Scraped Abbotsford Web Page Source.")
     abbotsford_page_data = scraping.parse_awws_pagesource(abbotsford_page_source)
     logging.info("Parsed Abbotsford Web Page Source.")
+    logging.debug(f"{abbotsford_page_data=}")
 
     # Vancouver Data
     vancouver_page_source = scraping.scrape_awws_metar_pagesource("vancouver")
     logging.info("Scraped Vancouver Web Page Source.")
     vancouver_page_data = scraping.parse_awws_pagesource(vancouver_page_source)
     logging.info("Parsed Vancouver Web Page Source.")
+    logging.debug(f"{vancouver_page_data=}")
 
     # Writing to DB
     with database.dynamodb_connection() as db:
@@ -28,7 +30,3 @@ def awws_metar_ingestion_pipeline():
         database.write_data_documents_to_awws_database(db, abbotsford_page_data)
         database.write_data_documents_to_awws_database(db, vancouver_page_data)
         logging.info("Finished writing data documents to DynamoDB.")
-
-
-if __name__ == "__main__":
-    awws_metar_ingestion_pipeline()
