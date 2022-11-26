@@ -55,7 +55,7 @@ def write_data_documents_to_awws_database(
 
     # Get Config.
     data_config = config.read_yaml_from("config/data.yml")
-    report_type = data_documents["0"]["report"]
+    report_type = data_documents[0]["report"]
     table_config = data_config["dynamodb"]["awws"][report_type]
     table_name = table_config["table-name"]
     partition_key = table_config["partition-key"]
