@@ -16,7 +16,9 @@ def known_awws_metar_van_data():
     with open("test/known_awws_metar_van_data.json") as f:
         data = json.load(f)
     # Update JSON (string) keys to the integers we create during scraping.
-    updated_key_data = {int(table_num) : table_data for table_num, table_data in data.items()}
+    updated_key_data = {
+        int(table_num): table_data for table_num, table_data in data.items()
+    }
     return updated_key_data
 
 
@@ -25,7 +27,9 @@ def known_awws_metar_abbotsford_data():
     with open("test/known_awws_metar_abbotsford_data.json") as f:
         data = json.load(f)
     # Update JSON (string) keys to the integers we create during scraping.
-    updated_key_data = {int(table_num) : table_data for table_num, table_data in data.items()}
+    updated_key_data = {
+        int(table_num): table_data for table_num, table_data in data.items()
+    }
     return updated_key_data
 
 
