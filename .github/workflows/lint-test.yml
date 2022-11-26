@@ -1,11 +1,18 @@
 name: Lint, Build, and Test Source Files
 
-on: [pull_request]
+on: 
+  pull_request:
+  	branches:
+    - "**"
+  push:
+    branches:
+    - "**"
 
 permissions: write-all
 
 jobs:
   lint:
+    name: Lint files with Black and Flake8.
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -28,7 +35,8 @@ jobs:
         src: "./src"
         version: "~= 22.0"
 
-  build:
+  build-test:
+    name: Build Environment and Test Files.
     needs: lint
     runs-on: ubuntu-latest
     strategy:
@@ -64,26 +72,41 @@ jobs:
         role-to-assume: arn:aws:iam::832310466375:role/propeller-test-access
         aws-region: us-west-1
 
-    - name: Running Test Suite to Generate Code Coverage 
+    - name: Running Full Test Suite 
+      if: (github.event_name == 'pull_request') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
       run: |
         coverage run -m pytest ./test
 
+    - name: Running Slim Test Suite 
+      if: github.event_name == 'push' && github.ref != 'refs/heads/main'
+      run: |
+        pytest -m "not expensive"
+
     - name: Coverage Badge # https://github.com/tj-actions/coverage-badge-py
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.python-version == '3.9'
       uses: tj-actions/coverage-badge-py@v1.8
       with:
         output: "reports/coverage.svg"
 
     - name: Verify Changed files
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: tj-actions/verify-changed-files@v9
       id: changed_files
       with:
         files: reports/coverage.svg
 
-    - name: Commit and push files
+    - name: Commit coverage.svg
       if: steps.changed_files.outputs.files_changed == 'true'
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add reports/coverage.svg
         git commit -m "Updated coverage.svg [no ci]"
-        git push
+
+    - name: Push coverage.svg
+      if: steps.changed_files.outputs.files_changed == 'true'
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.github_token }}
+        branch: ${{ github.ref }}
+
