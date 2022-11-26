@@ -79,17 +79,11 @@ jobs:
       with:
         files: reports/coverage.svg
 
-    - name: Commit files
+    - name: Commit and push files
       if: steps.changed_files.outputs.files_changed == 'true'
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add reports/coverage.svg
         git commit -m "Updated coverage.svg [no ci]"
-
-    - name: Push changes
-      if: steps.changed_files.outputs.files_changed == 'true'
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.github_token }}
-        branch: ${{ github.ref }}
+        git push
