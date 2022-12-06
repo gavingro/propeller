@@ -37,5 +37,4 @@ jobs:
         aws-region: us-west-1
 
     - name: Execute Ingestion Pipeline
-      run: |
-      	python main_ingestion.py
+      run: python main_ingestion.py
