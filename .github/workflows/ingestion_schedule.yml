@@ -1,9 +1,8 @@
 name: Ingestion Pipeline to write to DynamoDB
 
-on: workflow_dispatch
-  # schedule:
-  #   - cron: "0 */2 * * *"
-  
+on:
+  schedule:
+    - cron: "0 */2 * * *"
 
 permissions:
   id-token: write
