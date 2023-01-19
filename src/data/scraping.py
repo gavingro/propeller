@@ -48,7 +48,7 @@ def scrape_awws_metar_pagesource(
     chrome_options.add_argument("--headless")
     chrome_service = chrome.service.Service(
         ChromeDriverManager(
-            version="108.0.5359.124", chrome_type=ChromeType.CHROMIUM
+            version="85.0.4183.83-0ubuntu2", chrome_type=ChromeType.CHROMIUM
         ).install()
     )
     driver = webdriver.Chrome(
