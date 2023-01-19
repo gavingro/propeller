@@ -61,7 +61,7 @@ jobs:
       run: sudo apt purge chromium-browser
 
     - name: Install a new Chromium
-      run: sudo apt install -y chromium-browser=85.0.4183.83-0ubuntu2
+      run: sudo apt install -y chromium-browser=109.0.5414
 
     - name: Start DynamoDB in GitHub Actions
       uses: rrainn/dynamodb-action@v3.0.0
