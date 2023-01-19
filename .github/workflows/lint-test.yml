@@ -90,7 +90,6 @@ jobs:
 
     - name: Verify Changed files (Main Coverage)
       if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.python-version == '3.9'
-      uses: tj-actions/coverage-badge-py@v1.8 # REMOVE??
       uses: tj-actions/verify-changed-files@v9
       id: changed_files
       with:
